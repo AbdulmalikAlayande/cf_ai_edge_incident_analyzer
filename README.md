@@ -2,8 +2,6 @@
 
 A stateful AI-powered investigation assistant that analyzes distributed system logs and incident descriptions, detects known failure patterns, and guides engineers through iterative root cause analysis using structured reasoning.
 
--
-
 ### Example Usage
 1. Step 1 – Initial Incident
 

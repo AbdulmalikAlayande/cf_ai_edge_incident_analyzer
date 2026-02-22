@@ -4,6 +4,7 @@ A stateful AI assistant that analyzes distributed system logs and incident descr
 
 ### Example Usage
 1. Step 1 – Initial Incident
+
    User pastes:
    - Logs from multiple services
    - Error traces
@@ -16,7 +17,8 @@ A stateful AI assistant that analyzes distributed system logs and incident descr
    - Impact explanation
    - Suggested next checks
 
-2. Step 2 – Follow-Up
+3. Step 2 – Follow-Up
+
    User says:
    - “This only affects eu-west region.”
      
@@ -25,7 +27,8 @@ A stateful AI assistant that analyzes distributed system logs and incident descr
    - Reasons about regional failure
    - Adjusts explanation
 
-3. Step 3 – Deeper Probing
+5. Step 3 – Deeper Probing
+
    User says:
    - “Retries are set to 5 with exponential backoff.”
    

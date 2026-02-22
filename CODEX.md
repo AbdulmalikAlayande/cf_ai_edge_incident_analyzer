@@ -1,4 +1,5 @@
 # CODEX.md — Codex Onboarding Document
+
 # cf_ai_edge_incident_analyzer
 
 > Read this entire file before touching any code.
@@ -17,17 +18,18 @@ This is a Cloudflare internship assignment. Every decision — architecture, nam
 
 ## Technology Stack
 
-| Concern | Tool |
-|---|---|
-| Runtime | Cloudflare Workers |
-| Language | TypeScript |
-| State / Memory | Cloudflare Durable Objects |
-| LLM | Workers AI — Llama 3.3 |
-| Frontend | Plain HTML + Vanilla JS |
-| Config | wrangler.jsonc |
-| Package Manager | npm |
+| Concern         | Tool                       |
+| --------------- | -------------------------- |
+| Runtime         | Cloudflare Workers         |
+| Language        | TypeScript                 |
+| State / Memory  | Cloudflare Durable Objects |
+| LLM             | Workers AI — Llama 3.3     |
+| Frontend        | Plain HTML + Vanilla JS    |
+| Config          | wrangler.jsonc             |
+| Package Manager | npm                        |
 
 **Hard constraints:**
+
 - No Node.js/Express backend
 - No external AI APIs (no OpenAI, no Anthropic)
 - No React, Vue, or frontend frameworks
@@ -54,6 +56,7 @@ cf_ai_edge_incident_analyzer/
 ├── frontend/
 │   ├── index.html               # Single-page chat UI
 │   └── main.js                  # Handles UI interactions and fetch calls
+├── .env                         # environment variables
 ├── CLAUDE.md                    # Onboarding doc for Claude Code agent
 ├── CODEX.md                     # This file
 ├── AGENTS.md                    # General agent guidance
@@ -99,6 +102,7 @@ chat.ts   →  return { sessionId, response }
 A Durable Object is a single-instance stateful object in Cloudflare's edge network. We use one DO instance per user session to store conversation history. The DO is identified by `sessionId` (a UUID string). Each session's history is stored under the key `"session"` in Durable Object storage.
 
 The class is `SessionObject`. It must be:
+
 - Defined and exported from `src/durable-objects/session.ts`
 - Re-exported from `src/index.ts`
 - Bound in `wrangler.jsonc` under `durable_objects.bindings`
@@ -111,30 +115,30 @@ All types live in `src/types.ts`. Do not define types elsewhere.
 
 ```typescript
 type Message = {
-  role: "user" | "assistant";
-  text: string;
+	role: "user" | "assistant";
+	text: string;
 };
 
 type SessionState = {
-  sessionId: string;
-  history: Message[];
-  createdAt: string;
+	sessionId: string;
+	history: Message[];
+	createdAt: string;
 };
 
 type ChatRequest = {
-  sessionId?: string;
-  textLogs?: string;
-  message: string;
+	sessionId?: string;
+	textLogs?: string;
+	message: string;
 };
 
 type ChatResponse = {
-  sessionId: string;
-  response: string;
+	sessionId: string;
+	response: string;
 };
 
 interface Env {
-  AI: Ai;
-  SESSIONS: DurableObjectNamespace;
+	AI: Ai;
+	SESSIONS: DurableObjectNamespace;
 }
 ```
 
@@ -147,15 +151,17 @@ interface Env {
 Accepts two formats:
 
 **JSON body:**
+
 ```json
 {
-  "sessionId": "optional — omit on first request",
-  "textLogs": "any log content as string",
-  "message": "user question or context"
+	"sessionId": "optional — omit on first request",
+	"textLogs": "any log content as string",
+	"message": "user question or context"
 }
 ```
 
 **multipart/form-data:**
+
 ```
 sessionId  → optional string
 file       → log file (.txt, .log, .json)
@@ -163,19 +169,22 @@ message    → string
 ```
 
 **Success response:**
+
 ```json
 {
-  "sessionId": "uuid string",
-  "response": "AI analysis text"
+	"sessionId": "uuid string",
+	"response": "AI analysis text"
 }
 ```
 
 **Error response:**
+
 ```json
 {
-  "error": "description of what went wrong"
+	"error": "description of what went wrong"
 }
 ```
+
 HTTP status: 400 for bad input, 500 for internal errors.
 
 ---
@@ -207,6 +216,7 @@ Be precise. Do not hallucinate. If unsure, say so.
 ```
 
 Format history as:
+
 ```
 [user]: <text>
 [assistant]: <text>
@@ -220,26 +230,26 @@ Format history as:
 
 ```jsonc
 {
-  "name": "cf-ai-edge-incident-analyzer",
-  "main": "src/index.ts",
-  "compatibility_date": "2024-01-01",
-  "ai": {
-    "binding": "AI"
-  },
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "SESSIONS",
-        "class_name": "SessionObject"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_classes": ["SessionObject"]
-    }
-  ]
+	"name": "cf-ai-edge-incident-analyzer",
+	"main": "src/index.ts",
+	"compatibility_date": "2024-01-01",
+	"ai": {
+		"binding": "AI",
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SESSIONS",
+				"class_name": "SessionObject",
+			},
+		],
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["SessionObject"],
+		},
+	],
 }
 ```
 
@@ -265,15 +275,15 @@ Format history as:
 
 ## File Responsibilities (Quick Reference)
 
-| File | Does | Does NOT |
-|---|---|---|
-| `index.ts` | Route requests | Business logic |
-| `chat.ts` | Parse request, coordinate flow, return response | Call AI directly |
-| `session.ts` | Load/save session state | Build prompts or call AI |
-| `prompt.ts` | Build prompt string | Store state or call AI |
-| `ai.ts` | Call Workers AI | Parse requests or manage sessions |
-| `utils.ts` | Normalize logs to string | Anything else |
-| `types.ts` | Define all shared types | Contain logic |
+| File         | Does                                            | Does NOT                          |
+| ------------ | ----------------------------------------------- | --------------------------------- |
+| `index.ts`   | Route requests                                  | Business logic                    |
+| `chat.ts`    | Parse request, coordinate flow, return response | Call AI directly                  |
+| `session.ts` | Load/save session state                         | Build prompts or call AI          |
+| `prompt.ts`  | Build prompt string                             | Store state or call AI            |
+| `ai.ts`      | Call Workers AI                                 | Parse requests or manage sessions |
+| `utils.ts`   | Normalize logs to string                        | Anything else                     |
+| `types.ts`   | Define all shared types                         | Contain logic                     |
 
 ---
 

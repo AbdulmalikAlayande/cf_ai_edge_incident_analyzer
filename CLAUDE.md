@@ -1,4 +1,5 @@
 # CLAUDE.md — Claude Code Onboarding Document
+
 # cf_ai_edge_incident_analyzer
 
 > Read this file fully before writing, editing, or deleting any code.
@@ -16,14 +17,14 @@ This is a Cloudflare internship submission. Code quality, architecture, and docu
 
 ## The Stack (Non-Negotiable)
 
-| Layer | Technology |
-|---|---|
-| Backend | Cloudflare Workers (TypeScript) |
-| Stateful Memory | Cloudflare Durable Objects |
-| AI / LLM | Workers AI — Llama 3.3 (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) |
-| Frontend | Plain HTML + JS (served via Cloudflare Pages or Worker static assets) |
-| Config | `wrangler.jsonc` |
-| Language | TypeScript throughout |
+| Layer           | Technology                                                            |
+| --------------- | --------------------------------------------------------------------- |
+| Backend         | Cloudflare Workers (TypeScript)                                       |
+| Stateful Memory | Cloudflare Durable Objects                                            |
+| AI / LLM        | Workers AI — Llama 3.3 (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`)   |
+| Frontend        | Plain HTML + JS (served via Cloudflare Pages or Worker static assets) |
+| Config          | `wrangler.jsonc`                                                      |
+| Language        | TypeScript throughout                                                 |
 
 Do not introduce Node.js, Express, external databases, or third-party AI SDKs. Everything runs on Cloudflare.
 
@@ -47,6 +48,7 @@ cf_ai_edge_incident_analyzer/
 ├── frontend/
 │   ├── index.html               # Chat UI (log paste + file upload)
 │   └── main.js                  # Frontend logic — API calls, DOM updates
+├── .env                         # environment variables
 ├── CLAUDE.md                    # This file
 ├── CODEX.md                     # Onboarding doc for Codex
 ├── AGENTS.md                    # General agent instructions
@@ -63,18 +65,22 @@ cf_ai_edge_incident_analyzer/
 ## Key Concepts You Must Understand
 
 ### Durable Objects
+
 A Durable Object (DO) is a single-instance, stateful object that lives at the edge. We use it to store per-session conversation history. Each user session gets its own DO instance identified by a `sessionId`.
 
 The DO class is `SessionObject` in `src/durable-objects/session.ts`. It must be exported from `src/index.ts` and bound in `wrangler.jsonc`.
 
 ### Single API Endpoint
+
 The entire backend is one endpoint: `POST /chat`. It accepts either:
+
 - JSON body with `{ sessionId?, textLogs, message }`
 - Multipart form with `sessionId`, `file`, `message` fields
 
 The Worker detects content type and normalizes both into the same pipeline.
 
 ### Session Flow
+
 ```
 Request → Worker (index.ts)
         → Load or create SessionObject (Durable Object)
@@ -94,25 +100,25 @@ Request → Worker (index.ts)
 // src/types.ts
 
 type Message = {
-  role: "user" | "assistant";
-  text: string;
+	role: "user" | "assistant";
+	text: string;
 };
 
 type SessionState = {
-  sessionId: string;
-  history: Message[];
-  createdAt: string;
+	sessionId: string;
+	history: Message[];
+	createdAt: string;
 };
 
 type ChatRequest = {
-  sessionId?: string;
-  textLogs?: string;
-  message: string;
+	sessionId?: string;
+	textLogs?: string;
+	message: string;
 };
 
 type ChatResponse = {
-  sessionId: string;
-  response: string;
+	sessionId: string;
+	response: string;
 };
 ```
 
@@ -123,15 +129,17 @@ type ChatResponse = {
 ### `POST /chat`
 
 **Option A — JSON**
+
 ```json
 {
-  "sessionId": "optional-string",
-  "textLogs": "raw or JSON logs as string",
-  "message": "user question or description"
+	"sessionId": "optional-string",
+	"textLogs": "raw or JSON logs as string",
+	"message": "user question or description"
 }
 ```
 
 **Option B — multipart/form-data**
+
 ```
 sessionId  (optional)
 file       (log file — .txt, .log, .json)
@@ -139,10 +147,11 @@ message    (string)
 ```
 
 **Response**
+
 ```json
 {
-  "sessionId": "string",
-  "response": "string"
+	"sessionId": "string",
+	"response": "string"
 }
 ```
 
@@ -182,26 +191,26 @@ The config must include these bindings:
 
 ```jsonc
 {
-  "name": "cf-ai-edge-incident-analyzer",
-  "main": "src/index.ts",
-  "compatibility_date": "2024-01-01",
-  "ai": {
-    "binding": "AI"
-  },
-  "durable_objects": {
-    "bindings": [
-      {
-        "name": "SESSIONS",
-        "class_name": "SessionObject"
-      }
-    ]
-  },
-  "migrations": [
-    {
-      "tag": "v1",
-      "new_classes": ["SessionObject"]
-    }
-  ]
+	"name": "cf-ai-edge-incident-analyzer",
+	"main": "src/index.ts",
+	"compatibility_date": "2024-01-01",
+	"ai": {
+		"binding": "AI",
+	},
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SESSIONS",
+				"class_name": "SessionObject",
+			},
+		],
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["SessionObject"],
+		},
+	],
 }
 ```
 
@@ -212,8 +221,8 @@ The config must include these bindings:
 ```typescript
 // referenced in index.ts and session.ts
 interface Env {
-  AI: Ai;
-  SESSIONS: DurableObjectNamespace;
+	AI: Ai;
+	SESSIONS: DurableObjectNamespace;
 }
 ```
 

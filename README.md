@@ -2,6 +2,8 @@
 
 A stateful AI assistant that analyzes distributed system logs and incident descriptions to detect failure patterns, explain probable root causes, and guide engineers through debugging.
 
+---
+
 ### Example Usage
 1. Step 1 – Initial Incident
 

@@ -38,3 +38,24 @@ A stateful AI-powered investigation assistant that analyzes distributed system l
    - Refines analysis
    - Suggests circuit breaker misconfiguration possibility
 
+## Frontend TypeScript Workflow
+
+The frontend source file is `frontend/scripts/main.ts`.
+
+- Edit TypeScript: `frontend/scripts/main.ts`
+- Generated runtime file for browser: `frontend/scripts/main.js`
+
+Commands:
+
+```bash
+npm run build:frontend
+npm run dev:frontend
+npm run dev
+```
+
+Recommended local setup (2 terminals):
+
+1. `npm run dev:frontend` (keeps `main.js` in sync from TS)
+2. `npm run dev` (runs Wrangler worker)
+
+Frontend entry page: `frontend/views/index.html`

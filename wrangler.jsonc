@@ -8,11 +8,23 @@
 	"main": "src/index.ts",
 	"compatibility_date": "2026-02-19",
 	"observability": {
-		"enabled": true
+		"enabled": true,
 	},
-	"compatibility_flags": [
-		"nodejs_compat"
-	]
+	"compatibility_flags": ["nodejs_compat"],
+	"durable_objects": {
+		"bindings": [
+			{
+				"name": "SESSIONS",
+				"class_name": "SessionObject",
+			},
+		],
+	},
+	"migrations": [
+		{
+			"tag": "v1",
+			"new_classes": ["SessionObject"],
+		},
+	],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

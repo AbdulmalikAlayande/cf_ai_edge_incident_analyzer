@@ -4,39 +4,44 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Incident Investigator</title>
-    <link rel="stylesheet" href="../styles/main.css" />
+		<link rel="stylesheet" href="/frontend/views/main.css?v=6" />
 	</head>
 	<body>
-		<div class="bg-layer" aria-hidden="true"></div>
-		<div class="app-shell">
+		<div class="app">
 			<header class="topbar">
-				<div class="brand-block">
-					<h1>Incident Investigator</h1>
-					<p>Distributed systems debugging assistant</p>
+				<div class="topbar__left">
+					<div class="brand">
+						<div class="brand__title">Incident Investigator</div>
+						<div class="brand__subtitle">
+							Distributed systems debugging assistant
+						</div>
+					</div>
 				</div>
-				<div class="session-block">
-					<p id="session-status" class="session-status">Not started</p>
-					<button id="new-session-btn" type="button" class="btn btn-secondary">
+
+				<div class="topbar__right">
+					<span id="session-status" class="session-status">Not started</span>
+					<button id="new-session-btn" type="button" class="btn btn--secondary">
 						New session
 					</button>
 				</div>
 			</header>
 
-			<main class="main-content">
+			<main class="content">
 				<section
 					id="chat-feed"
-					class="chat-feed"
+					class="chat"
 					aria-live="polite"
 					aria-label="Chat transcript"
 				>
-					<div id="empty-state" class="empty-state">
-						<h2>Start an investigation</h2>
-						<p>
+					<div id="empty-state" class="empty">
+						<div class="empty__title">Start an investigation</div>
+						<div class="empty__desc">
 							Paste logs, attach a file, or describe what users are
-							experiencing. I&rsquo;ll identify likely distributed failure
-							patterns and guide the next checks.
-						</p>
-						<div class="example-grid" role="group" aria-label="Example prompts">
+							experiencing. I’ll identify likely distributed failure patterns
+							and guide the next checks.
+						</div>
+
+						<div class="empty__chips" role="group" aria-label="Example prompts">
 							<button
 								type="button"
 								class="example-chip"
@@ -44,6 +49,7 @@
 							>
 								Latency spiked after deploy; only eu-west affected.
 							</button>
+
 							<button
 								type="button"
 								class="example-chip"
@@ -51,70 +57,91 @@
 							>
 								Seeing timeouts between API and auth service.
 							</button>
+
 							<button
 								type="button"
 								class="example-chip"
-								data-example="Queue backlog growing; workers can&rsquo;t keep up."
+								data-example="Queue backlog growing; workers can’t keep up."
 							>
-								Queue backlog growing; workers can&rsquo;t keep up.
+								Queue backlog growing; workers can’t keep up.
 							</button>
 						</div>
 					</div>
 				</section>
-			</main>
 
-			<section class="composer-dock" aria-label="Message composer">
-				<div class="input-mode-panel">
-					<div class="input-mode-row">
-						<span class="input-mode-label">Input type</span>
-						<div class="toggle-group" role="tablist" aria-label="Input type">
-							<button type="button" class="toggle-btn active" data-mode="logs">
-								Paste logs
-							</button>
-							<button type="button" class="toggle-btn" data-mode="describe">
-								Describe incident
-							</button>
+				<section class="composer" aria-label="Message composer">
+					<div class="composer__panel">
+						<div class="controls">
+							<div class="controls__left">
+								<span class="label">Input type</span>
+
+								<div
+									class="toggle-group"
+									role="tablist"
+									aria-label="Input type"
+								>
+									<button
+										type="button"
+										class="toggle-btn active"
+										data-mode="logs"
+									>
+										Paste logs
+									</button>
+									<button type="button" class="toggle-btn" data-mode="describe">
+										Describe incident
+									</button>
+								</div>
+							</div>
+
+							<div class="controls__right">
+								<label class="file-pill" for="file-input">
+									<span class="file-pill__icon" aria-hidden="true">📎</span>
+									<span class="file-pill__text">Attach log</span>
+								</label>
+								<input
+									id="file-input"
+									type="file"
+									accept=".log,.txt,.json,text/plain,application/json"
+								/>
+							</div>
 						</div>
-					</div>
-					<div class="file-panel">
-						<label for="file-input" class="file-label"
-							>Attach log file (optional)</label
-						>
-						<input
-							id="file-input"
-							type="file"
-							accept=".log,.txt,.json,text/plain,application/json"
-						/>
-						<p class="meta-text">.log, .txt, .json supported</p>
-						<p class="hint-text">
-							Tip: include region, service name, timestamps if you have them.
-						</p>
-						<p id="file-name" class="file-name" hidden></p>
-					</div>
-				</div>
 
-				<div class="composer-panel">
-					<textarea
-						id="message-input"
-						rows="3"
-						placeholder="Paste logs or describe the incident… (Shift+Enter for new line)"
-					></textarea>
-					<div class="composer-actions">
-						<button id="clear-input-btn" type="button" class="btn btn-ghost">
-							Clear input
-						</button>
-						<button id="send-btn" type="button" class="btn btn-primary">
-							Send
-						</button>
+						<p id="file-name" class="file-name" hidden></p>
+
+						<div class="inputrow">
+							<textarea
+								id="message-input"
+								rows="3"
+								placeholder="Paste logs or describe the incident… (Shift+Enter for new line)"
+							></textarea>
+
+							<div class="actions">
+								<button
+									id="clear-input-btn"
+									type="button"
+									class="btn btn--ghost"
+								>
+									Clear
+								</button>
+								<button id="send-btn" type="button" class="btn btn--primary">
+									Send
+								</button>
+							</div>
+						</div>
+
+						<div class="meta">
+							<div class="meta__left">.log, .txt, .json supported</div>
+							<div class="meta__right">
+								Tip: include region, service name, timestamps if you have them.
+							</div>
+						</div>
+
+						<div class="trust-note">Your data stays in this session.</div>
 					</div>
-				</div>
-				<p class="trust-note">Your data stays in this session.</p>
-			</section>
+				</section>
+			</main>
 		</div>
 
-		<script type="module" src="../scripts/main.js"></script>
+		<script type="module" src="/frontend/scripts/main.js"></script>
 	</body>
 </html>
-
-
-

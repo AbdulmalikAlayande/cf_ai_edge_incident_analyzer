@@ -11,44 +11,6 @@ import { runIncidentAnalysis } from "../lib/ai";
 const STORAGE_KEY_PREFIX = "session:";
 const MAX_HISTORY_MESSAGES = 20;
 
-function buildHeuristicReply(userText: string): string {
-	const lowerText = userText.toLowerCase();
-
-	const patterns: string[] = [];
-	if (lowerText.includes("error") || lowerText.includes("fail"))
-		patterns.push("error");
-	if (lowerText.includes("slow") || lowerText.includes("latency"))
-		patterns.push("performance degradation");
-	if (lowerText.includes("timeout")) patterns.push("timeout");
-	if (lowerText.includes("retry")) patterns.push("retry storm risk");
-	if (lowerText.includes("queue")) patterns.push("queue backlog");
-	if (lowerText.includes("eu-west") || lowerText.includes("region"))
-		patterns.push("regional failure");
-
-	const mostLikelyIssue =
-		patterns[0] ?? "insufficient information/evidence to determine issue type";
-	return [
-		"Most likely pattern:",
-		mostLikelyIssue,
-		"",
-		"Why I think so:",
-		"Initial signal matching from provided context. More confidence requires correlated timestamps, service boundaries, and error-rate trend.",
-		"",
-		"Top 3 hypotheses:",
-		"1. Dependency latency or timeout amplification.",
-		"2. Retry configuration creating load multiplication.",
-		"3. Regional infrastructure or network degradation.",
-		"",
-		"What to check next:",
-		"1. Compare error/latency by region and service.",
-		"2. Inspect retry volume and saturation metrics.",
-		"3. Verify recent deploy or config drift around incident start.",
-		"",
-		"What would change my mind:",
-		"Evidence showing unaffected upstream dependencies and stable latency/error profiles during the same window.",
-	].join("\n");
-}
-
 function isValidSessionRequest(value: unknown): value is SessionRequest {
 	if (typeof value !== "object" || value === null || Array.isArray(value))
 		return false;
@@ -107,18 +69,29 @@ export class SessionObject {
 			createdAt: new Date().toISOString(),
 		};
 
+		const prompt = buildIncidentAnalysisPrompt(userText, sessionState.history);
+
+		let aiResponse: string;
+		try {
+			aiResponse = await runIncidentAnalysis(this.env, prompt);
+		} catch {
+			const error: ErrorResponse = {
+				error: "Failed to get response from AI model",
+			};
+			return Response.json(error, { status: 502 });
+		}
+
 		const userMessage: Message = { role: "user", text: userText };
 		sessionState.history.push(userMessage);
 
-		const reply = buildHeuristicReply(userText);
-		const assistantMessage: Message = { role: "assistant", text: reply };
+		const assistantMessage: Message = { role: "assistant", text: aiResponse };
 		sessionState.history.push(assistantMessage);
 
 		sessionState.history = sessionState.history.slice(-MAX_HISTORY_MESSAGES);
 
 		await this.state.storage.put(storageKey, sessionState);
 		const response: ChatResponse = {
-			response: reply,
+			response: aiResponse,
 			sessionId: sessionState.sessionId,
 		};
 		return Response.json(response);

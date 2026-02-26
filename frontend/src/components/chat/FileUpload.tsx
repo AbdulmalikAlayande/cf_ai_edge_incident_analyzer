@@ -39,14 +39,14 @@ function FileUpload({ file, disabled, className, onFileChange }: FileUploadProps
         }}
       />
 
-      <Button type="button" variant="outline" size="sm" disabled={disabled} onClick={openFileDialog}>
+      <Button type="button" variant="secondary" size="sm" disabled={disabled} onClick={openFileDialog} className="bg-background/70">
         <Paperclip className="size-4" />
         Upload log file
       </Button>
 
       {file ? (
-        <div className="flex items-center gap-2 rounded-md border border-border/80 bg-background/70 px-2 py-1">
-          <Badge variant="outline" className="max-w-56 truncate border-border/80 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 rounded-md bg-background/65 px-2 py-1">
+          <Badge variant="secondary" className="max-w-56 truncate text-xs text-muted-foreground">
             {file.name}
           </Badge>
           <Button type="button" variant="ghost" size="icon-xs" onClick={clearFile} disabled={disabled}>

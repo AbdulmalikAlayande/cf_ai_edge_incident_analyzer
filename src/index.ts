@@ -1,12 +1,9 @@
-import type { ChatRequest } from "./types";
+import { parseChatRequest } from "./endpoints/chat";
+import { ErrorResponse, SessionRequest } from "./types";
 export { SessionObject } from "./durable-objects/session";
 
 interface Env {
 	SESSIONS: DurableObjectNamespace;
-}
-interface RequestBody {
-	message: string;
-	sessionId?: string;
 }
 
 export default {
@@ -15,29 +12,30 @@ export default {
 		if (request.method !== "POST" || url.pathname !== "/chat") {
 			return new Response("Not Found", { status: 404 });
 		}
-		let body: ChatRequest;
-		try {
-			body = await request.json<ChatRequest>();
-		} catch (error) {
-			return Response.json({ error: "Invalid JSON" }, { status: 400 });
+
+		const parseResult = await parseChatRequest(request);
+		if (parseResult.ok === false) {
+			return parseResult.response;
 		}
 
-		const message = body.message?.trim();
-		if (!message) {
-			return Response.json({ error: "Message is required" }, { status: 400 });
-		}
-
-		const sessionId = body.sessionId?.trim() || crypto.randomUUID();
+		const sessionId = parseResult.value.sessionId || crypto.randomUUID();
+		const payload: SessionRequest = {
+			sessionId,
+			userText: parseResult.value.userText,
+		};
 
 		const stub = env.SESSIONS.getByName(sessionId);
 		const forwardedRequest = new Request(request.url, {
 			method: "POST",
-			headers: request.headers,
-			body: JSON.stringify({
-				message,
-				sessionId,
-			}),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
 		});
-		return stub.fetch(forwardedRequest);
+
+		try {
+			return await stub.fetch(forwardedRequest);
+		} catch {
+			const body: ErrorResponse = { error: "Failed to process chat request" };
+			return Response.json(body, { status: 500 });
+		}
 	},
 };

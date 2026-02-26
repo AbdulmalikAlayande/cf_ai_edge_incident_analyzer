@@ -139,7 +139,7 @@ function AssistantSections({ content }: AssistantSectionsProps) {
       ) : null}
 
       {parsed.sections.map((section) => (
-        <Card key={section.title} className="gap-3 border-border/80 bg-card/80 py-4 shadow-none backdrop-blur-sm">
+        <Card key={section.title} className="gap-2 border-0 bg-background/62 py-3 shadow-none">
           <CardHeader className="px-4 py-0">
             <CardTitle className="text-sm font-semibold tracking-tight">{section.title}</CardTitle>
           </CardHeader>

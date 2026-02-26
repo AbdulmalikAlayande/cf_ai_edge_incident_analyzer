@@ -51,7 +51,7 @@ export class SessionObject {
 		}
 
 		const sessionId = body.sessionId.trim();
-		const userText = body.userText?.trim();
+		const userText = body.userText.trim();
 
 		if (!userText || !sessionId) {
 			return Response.json(
@@ -63,7 +63,7 @@ export class SessionObject {
 		const storageKey = `${STORAGE_KEY_PREFIX}${sessionId}`;
 		const storedState = await this.state.storage.get<SessionState>(storageKey);
 
-		const sessionState: SessionState = storedState || {
+		const sessionState: SessionState = storedState ?? {
 			sessionId,
 			history: [],
 			createdAt: new Date().toISOString(),
@@ -97,3 +97,4 @@ export class SessionObject {
 		return Response.json(response);
 	}
 }
+

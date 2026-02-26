@@ -1,11 +1,12 @@
 import {
-	ChatRequest,
 	ChatResponse,
 	ErrorResponse,
 	Message,
 	SessionRequest,
 	SessionState,
 } from "../types";
+import { buildIncidentAnalysisPrompt } from "../lib/prompt";
+import { runIncidentAnalysis } from "../lib/ai";
 
 const STORAGE_KEY_PREFIX = "session:";
 const MAX_HISTORY_MESSAGES = 20;
@@ -109,7 +110,6 @@ export class SessionObject {
 		const userMessage: Message = { role: "user", text: userText };
 		sessionState.history.push(userMessage);
 
-		// TODO: Here we would typically call our AI model to get a response based on the session history.
 		const reply = buildHeuristicReply(userText);
 		const assistantMessage: Message = { role: "assistant", text: reply };
 		sessionState.history.push(assistantMessage);

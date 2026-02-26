@@ -23,7 +23,7 @@ const QUICK_ACTIONS: Array<{
 }> = [
   {
     title: "Paste logs",
-    description: "Paste service and infrastructure logs for immediate pattern detection.",
+    description: "Drop in service and infrastructure logs for immediate pattern detection.",
     icon: ClipboardPaste,
     payload: {
       mode: "logs",
@@ -32,7 +32,7 @@ const QUICK_ACTIONS: Array<{
   },
   {
     title: "Describe incident",
-    description: "Summarize customer impact, affected regions, and recent deployment context.",
+    description: "Summarize user impact, affected region, and what changed before failure.",
     icon: FileChartColumnIncreasing,
     payload: {
       mode: "describe",
@@ -41,7 +41,7 @@ const QUICK_ACTIONS: Array<{
   },
   {
     title: "Upload log file",
-    description: "Attach a .txt, .log, or .json file and provide investigation context.",
+    description: "Attach .txt, .log, or .json logs and investigate with session context.",
     icon: Upload,
     payload: {
       mode: "logs",
@@ -59,22 +59,20 @@ function ChatFeed({ messages, onQuickAction }: ChatFeedProps) {
 
   if (messages.length === 0) {
     return (
-      <section className="flex min-h-0 flex-1 flex-col justify-center px-4 py-6 md:px-8" aria-live="polite">
-        <div className="mx-auto w-full max-w-4xl space-y-6">
-          <div className="space-y-3 text-center md:text-left">
-            <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
-              Distributed Systems Investigation
-            </p>
-            <h1 className="text-balance text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
-              Investigate incidents with structured, iterative analysis.
-            </h1>
-            <p className="text-pretty text-sm text-muted-foreground md:max-w-3xl">
-              Provide logs, describe observed impact, and refine hypotheses over multiple turns with
-              consistent session context.
+      <section className="flex min-h-0 flex-1 flex-col justify-center px-4 py-6 sm:px-6 md:px-8" aria-live="polite">
+        <div className="mx-auto w-full max-w-5xl space-y-7">
+          <div className="space-y-3 text-center sm:text-left">
+            <p className="text-xs font-medium tracking-[0.2em] text-muted-foreground uppercase">Incident Analysis</p>
+            <h2 className="text-balance text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
+              Provide evidence, iterate hypotheses, and isolate root cause faster.
+            </h2>
+            <p className="text-pretty text-sm text-muted-foreground sm:max-w-3xl sm:text-base">
+              Start with logs or a symptom summary. Continue the same session to refine hypotheses
+              across services, regions, retries, and dependencies.
             </p>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {QUICK_ACTIONS.map((action) => {
               const Icon = action.icon;
               return (
@@ -84,13 +82,13 @@ function ChatFeed({ messages, onQuickAction }: ChatFeedProps) {
                   onClick={() => onQuickAction(action.payload)}
                   className="text-left"
                 >
-                  <Card className="h-full gap-2 border-border/80 bg-card/75 py-4 shadow-none transition hover:border-ring/50 hover:bg-card/95">
+                  <Card className="h-full gap-3 border-0 bg-card/78 py-4 shadow-lg shadow-background/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-card/95">
                     <CardContent className="space-y-3 px-4 py-0">
-                      <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                        <Icon className="size-4" />
-                        <span>{action.title}</span>
+                      <div className="inline-flex items-center gap-2 rounded-full bg-background/75 px-2.5 py-1 text-xs font-medium text-foreground">
+                        <Icon className="size-3.5" />
+                        {action.title}
                       </div>
-                      <p className="text-xs leading-relaxed text-muted-foreground">{action.description}</p>
+                      <p className="text-sm leading-relaxed text-muted-foreground">{action.description}</p>
                     </CardContent>
                   </Card>
                 </button>
@@ -103,8 +101,8 @@ function ChatFeed({ messages, onQuickAction }: ChatFeedProps) {
   }
 
   return (
-    <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 md:px-8" aria-live="polite">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 pt-6">
+    <section className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 sm:px-6 md:px-8" aria-live="polite">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 pt-5 sm:pt-7">
         {messages.map((message) => (
           <MessageCard key={message.id} message={message} />
         ))}
@@ -115,4 +113,3 @@ function ChatFeed({ messages, onQuickAction }: ChatFeedProps) {
 }
 
 export default ChatFeed;
-

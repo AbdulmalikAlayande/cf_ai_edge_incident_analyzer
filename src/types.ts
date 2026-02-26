@@ -12,9 +12,30 @@ export type SessionState = {
 export type ChatRequest = {
 	message: string;
 	sessionId?: string;
+	textLogs?: string;
+};
+
+export type ParsedChatRequest = {
+	message: string;
+	sessionId?: string;
+	textLogs: string;
+	userText: string;
+};
+
+export type SessionRequest = {
+	sessionId: string;
+	userText: string;
 };
 
 export type ChatResponse = {
 	response: string;
 	sessionId: string;
 };
+
+export type ErrorResponse = {
+	error: string;
+};
+
+export type ChatParseResult =
+	| { ok: true; value: ParsedChatRequest }
+	| { ok: false; response: Response };

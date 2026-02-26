@@ -26,3 +26,33 @@ function extractResponseText(raw: AiRunResponse): string | null {
 
 	return null;
 }
+
+export async function runIncidentAnalysis(
+	env: Env,
+	prompt: string,
+): Promise<string> {
+	const messages = [
+		{
+			role: "system",
+			content:
+				"You are a precise distributed-systems incident analysis assistant.",
+		},
+		{
+			role: "user",
+			content: prompt,
+		},
+	];
+
+	const rawResponse = (await env.AI.run(MODEL, {
+		messages,
+		maxTokens: 1000,
+		temperature: 0.2,
+	})) as AiRunResponse;
+
+	const text = extractResponseText(rawResponse);
+	if (!text) {
+		throw new Error("Workers AI returned an empty response");
+	}
+
+	return text;
+}

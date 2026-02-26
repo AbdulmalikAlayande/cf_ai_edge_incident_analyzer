@@ -55,15 +55,15 @@ function Composer({ isSending, preset, onSend }: ComposerProps) {
   };
 
   return (
-    <div className="border-t border-border/70 px-4 pb-4 pt-3 md:px-8 md:pb-8 md:pt-5">
+    <div className="px-4 pb-4 pt-2 sm:px-6 sm:pb-6 md:px-8 md:pb-8">
       <form onSubmit={handleSubmit}>
-        <Card className="gap-4 border-border/80 bg-card/80 py-5 shadow-none backdrop-blur-sm">
-          <CardHeader className="space-y-3 px-4 py-0 md:px-5">
+        <Card className="gap-4 border-0 bg-card/82 py-5 shadow-xl shadow-background/25 backdrop-blur-sm">
+          <CardHeader className="space-y-3 px-4 py-0 sm:px-5">
             <ModeToggle mode={mode} onChange={setMode} disabled={isSending} />
             <FileUpload file={file} onFileChange={setFile} disabled={isSending} />
           </CardHeader>
 
-          <CardContent className="px-4 py-0 md:px-5">
+          <CardContent className="px-4 py-0 sm:px-5">
             <textarea
               value={message}
               onChange={(event) => setMessage(event.target.value)}
@@ -73,17 +73,17 @@ function Composer({ isSending, preset, onSend }: ComposerProps) {
                   : "Describe user impact, regions, recent deploys, and symptoms..."
               }
               disabled={isSending}
-              className="min-h-32 w-full resize-y rounded-xl border border-input bg-background/70 px-4 py-3 text-sm leading-relaxed text-foreground outline-none transition focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/40 disabled:cursor-not-allowed disabled:opacity-70"
+              className="min-h-28 w-full resize-y rounded-2xl bg-background/80 px-4 py-3 text-sm leading-relaxed text-foreground outline-none ring-1 ring-input/70 transition focus-visible:ring-2 focus-visible:ring-ring/45 disabled:cursor-not-allowed disabled:opacity-70 sm:min-h-32"
             />
           </CardContent>
 
-          <CardFooter className="flex flex-col items-start justify-between gap-3 px-4 py-0 md:flex-row md:items-center md:px-5">
-            <p className="text-xs leading-relaxed text-muted-foreground">
+          <CardFooter className="flex flex-col items-start justify-between gap-3 px-4 py-0 sm:flex-row sm:items-center sm:px-5">
+            <p className="text-xs leading-relaxed text-muted-foreground sm:max-w-[70%]">
               Include region, service name, timestamp window, and recent changes to improve
               hypothesis quality.
             </p>
 
-            <Button type="submit" disabled={!canSend} className="min-w-32 self-end md:self-auto">
+            <Button type="submit" disabled={!canSend} className="min-w-28 self-end sm:min-w-32 sm:self-auto">
               <SendHorizontal className="size-4" />
               {isSending ? "Analyzing..." : "Send"}
             </Button>
@@ -95,4 +95,3 @@ function Composer({ isSending, preset, onSend }: ComposerProps) {
 }
 
 export default Composer;
-

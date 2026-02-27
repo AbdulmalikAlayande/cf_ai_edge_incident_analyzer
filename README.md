@@ -2,6 +2,9 @@
 
 Last verified: 2026-02-27
 
+## Live URL
+- https://cf-ai-edge-incident-analyzer.alaabdulmalik03.workers.dev/
+
 ## Project in one sentence
 Cloudflare-native incident investigation assistant that analyzes logs with session-aware reasoning.
 
@@ -136,7 +139,7 @@ Failure hint: if you get `400`, ensure `message` is included in multipart form.
 
 ## 5-minute smoke test
 
-1. Open the app URL and confirm the React page renders.
+1. Open https://cf-ai-edge-incident-analyzer.alaabdulmalik03.workers.dev/ and confirm the React page renders.
 2. Send a first message without `sessionId`.
 3. Send a follow-up in the same session and verify continuity.
 4. Upload `sample-logs/incident-eu-west-checkout-timeout-retrystorm.log`.
@@ -176,7 +179,7 @@ Failure hint: if deploy fails, verify Cloudflare auth, AI/DO bindings, and accou
 3. Verify production endpoint.
 
 ```bash
-curl -X POST https://<worker-name>.<account-subdomain>.workers.dev/chat \
+curl -X POST https://cf-ai-edge-incident-analyzer.alaabdulmalik03.workers.dev/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"production smoke test"}'
 ```
@@ -184,8 +187,8 @@ curl -X POST https://<worker-name>.<account-subdomain>.workers.dev/chat \
 Expected result: `200` response with `sessionId` and `response`.
 Failure hint: if `404`, confirm Worker route and deployment target.
 
-Live URL format example:
-- `https://<worker-name>.<account-subdomain>.workers.dev`
+Live URL:
+- `https://cf-ai-edge-incident-analyzer.alaabdulmalik03.workers.dev/`
 
 ## Known limitations (MVP scope)
 - No D1/R2 billing or retention model in MVP.
@@ -200,6 +203,3 @@ Live URL format example:
 - Testing: `docs/testing.md`
 - Troubleshooting: `docs/troubleshooting.md`
 - Roadmap: `docs/roadmap.md`
-
-
-

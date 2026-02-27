@@ -4,10 +4,17 @@ import type {
 	ErrorResponse,
 	ParsedChatRequest,
 } from "../types";
+import {
+	isRecord,
+	normalizeLineEndings,
+	readContentLength,
+	readOptionalString,
+} from "../lib/utils";
 
 const MAX_MESSAGE_CHARS = 8_000;
 const MAX_LOG_CHARS = 200_000;
 const MAX_SESSION_ID_CHARS = 128;
+const MAX_REQUEST_BYTES = 300_000;
 
 function badRequest(message: string): ChatParseResult {
 	const body: ErrorResponse = { error: message };
@@ -19,23 +26,14 @@ function unsupportedMediaType(message: string): ChatParseResult {
 	return { ok: false, response: Response.json(body, { status: 415 }) };
 }
 
-function normalizeLineEndings(text: string): string {
-	return text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-}
-
-function readOptionalString(value: unknown): string | undefined {
-	if (typeof value !== "string") return undefined;
-	const trimmed = value.trim();
-	return trimmed.length > 0 ? trimmed : undefined;
-}
-
-function isObject(value: unknown): value is Record<string, unknown> {
-	return typeof value === "object" && value !== null && !Array.isArray(value);
+function payloadTooLarge(message: string): ChatParseResult {
+	const body: ErrorResponse = { error: message };
+	return { ok: false, response: Response.json(body, { status: 413 }) };
 }
 
 async function parseJsonBody(request: Request): Promise<ChatRequest | null> {
 	const rawJson = await request.json<unknown>();
-	if (!isObject(rawJson)) return null;
+	if (!isRecord(rawJson)) return null;
 
 	const sessionId = readOptionalString(rawJson.sessionId);
 	const message = typeof rawJson.message === "string" ? rawJson.message : "";
@@ -124,8 +122,13 @@ function validateAndNormalize(input: ChatRequest): ChatParseResult {
 export async function parseChatRequest(
 	request: Request,
 ): Promise<ChatParseResult> {
-	const contentType =
-		request.headers.get("Content-Type")?.toLocaleLowerCase() ?? "";
+	const contentType = request.headers.get("Content-Type")?.toLowerCase() ?? "";
+	const contentLength = readContentLength(request.headers);
+	if (typeof contentLength === "number" && contentLength > MAX_REQUEST_BYTES) {
+		return payloadTooLarge(
+			`Request exceeds maximum payload size of ${MAX_REQUEST_BYTES} bytes`,
+		);
+	}
 
 	try {
 		if (contentType.includes("application/json")) {
@@ -133,16 +136,19 @@ export async function parseChatRequest(
 			if (!jsonBody) return badRequest("Invalid JSON body shape");
 			return validateAndNormalize(jsonBody);
 		}
+
 		if (contentType.includes("multipart/form-data")) {
 			const multipartBody = await parseMultipartBody(request);
-			if (!multipartBody)
+			if (!multipartBody) {
 				return badRequest("Invalid multipart form-data payload");
+			}
 			return validateAndNormalize(multipartBody);
 		}
+
 		return unsupportedMediaType(
-			"Unsuppprted Content-Type. use application/json or multipart/formdata",
+			"Unsupported Content-Type. Use application/json or multipart/form-data",
 		);
-	} catch (error) {
+	} catch {
 		return badRequest("Invalid request payload");
 	}
 }

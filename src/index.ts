@@ -1,10 +1,8 @@
 import { parseChatRequest } from "./endpoints/chat";
-import { ErrorResponse, SessionRequest } from "./types";
-export { SessionObject } from "./durable-objects/session";
+import { logEvent } from "./lib/utils";
+import type { ErrorResponse, SessionRequest } from "./types";
 
-interface Env {
-	SESSIONS: DurableObjectNamespace;
-}
+export { SessionObject } from "./durable-objects/session";
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
@@ -13,8 +11,13 @@ export default {
 			return new Response("Not Found", { status: 404 });
 		}
 
+		const requestId = crypto.randomUUID();
 		const parseResult = await parseChatRequest(request);
 		if (parseResult.ok === false) {
+			logEvent("warn", "chat_request_rejected", {
+				requestId,
+				status: parseResult.response.status,
+			});
 			return parseResult.response;
 		}
 
@@ -32,8 +35,21 @@ export default {
 		});
 
 		try {
-			return await stub.fetch(forwardedRequest);
-		} catch {
+			const response = await stub.fetch(forwardedRequest);
+			if (!response.ok) {
+				logEvent("warn", "do_response_non_ok", {
+					requestId,
+					sessionId,
+					status: response.status,
+				});
+			}
+			return response;
+		} catch (error) {
+			logEvent("error", "chat_request_failed", {
+				requestId,
+				sessionId,
+				error: error instanceof Error ? error.message : "Unknown error",
+			});
 			const body: ErrorResponse = { error: "Failed to process chat request" };
 			return Response.json(body, { status: 500 });
 		}

@@ -1,35 +1,95 @@
 # cf_ai_edge_incident_analyzer
 
-Stateful Cloudflare incident investigation assistant.
+Last verified: 2026-02-27
 
-## MVP Architecture (Internship)
+## Project in one sentence
+Cloudflare-native incident investigation assistant that analyzes logs with session-aware reasoning.
 
-Single deployed Cloudflare Worker app:
-- Serves React frontend static assets (`frontend/dist`)
-- Handles `POST /chat` API
-- Uses Durable Objects for session memory
-- Uses Workers AI for incident analysis
+## What problem it solves
+- Engineers need faster incident triage during active outages.
+- Logs plus follow-up questions must remain in one session context.
+- AI output must be structured and immediately actionable for on-call teams.
 
-MVP intentionally does not require Pages, D1, or R2.
+## MVP architecture snapshot
+- Worker: serves React static assets and handles `POST /chat`.
+- Durable Objects: keeps per-session investigation history.
+- Workers AI: generates structured incident analysis.
+- React frontend: sends same-origin requests to `/chat`.
 
-## Backend Modules
+```text
+Browser (React UI)
+   -> POST /chat (JSON or multipart)
+      -> Worker (src/index.ts)
+         -> Durable Object (SessionObject by sessionId)
+            -> Prompt builder (src/lib/prompt.ts)
+            -> Workers AI (src/lib/ai.ts)
+         <- { sessionId, response }
+   <- structured analysis rendered in chat feed
+```
 
-- `src/index.ts`: routes `POST /chat` to Durable Objects
-- `src/endpoints/chat.ts`: JSON/multipart parsing + validation
-- `src/durable-objects/session.ts`: session lifecycle + rate/size guardrails
-- `src/lib/prompt.ts`: prompt construction
-- `src/lib/ai.ts`: Workers AI call with timeout/retry/failure mapping
-- `src/lib/utils.ts`: shared normalization/logging helpers
+## Quickstart (local run in <5 min)
 
-## Frontend Integration Contract
+1. Install dependencies.
 
-Endpoint: `POST /chat`
+```bash
+npm install
+npm --prefix frontend install
+```
 
-Request:
-- `application/json`: `{ message, sessionId?, textLogs? }`
-- `multipart/form-data`: `message`, `sessionId?`, `textLogs?`, `file?`
+Expected result: install completes with no missing dependency errors.
+Failure hint: if `npm` fails, clear lock mismatch with `npm ci` in root and `frontend` separately.
+
+2. Generate Wrangler runtime types.
+
+```bash
+npm run cf-typegen
+```
+
+Expected result: `worker-configuration.d.ts` is regenerated successfully.
+Failure hint: if bindings are missing, verify `wrangler.jsonc` is valid JSONC and rerun.
+
+3. Run backend checks.
+
+```bash
+npm run typecheck
+npm test
+```
+
+Expected result: TypeScript passes and all tests pass.
+Failure hint: if tests fail, inspect parser/session tests first in `tests/*.test.ts`.
+
+4. Run Worker API locally.
+
+```bash
+npm run dev
+```
+
+Expected result: Worker starts and exposes local URL (typically `127.0.0.1:8787`).
+Failure hint: if startup fails, confirm Wrangler auth and Durable Object migration config.
+
+5. Optional: run React dev server with explicit API base.
+
+```bash
+VITE_API_BASE_URL=http://127.0.0.1:8787
+npm run dev:frontend
+```
+
+Expected result: React UI loads and sends requests to local Worker.
+Failure hint: if requests fail, check browser network tab for incorrect host or CORS/preflight errors.
+
+Done when:
+- UI loads in browser.
+- First chat returns `sessionId`.
+- Follow-up chat reuses same `sessionId`.
+
+## API contract (`POST /chat`)
+
+Request formats:
+- JSON: `{ "message": string, "sessionId"?: string, "textLogs"?: string }`
+- Multipart: fields `message`, optional `sessionId`, optional `textLogs`, optional `file`
 
 Response:
+
 ```json
 {
   "sessionId": "string",
@@ -37,65 +97,109 @@ Response:
 }
 ```
 
-Frontend API behavior (`frontend/src/lib/api.ts`):
-- Defaults to same-origin `/chat`
-- Optional override via `VITE_API_BASE_URL` (or legacy `VITE_API_SERVER_URL`)
+Error statuses currently used:
+- `400` invalid payload/body
+- `413` payload too large
+- `415` unsupported content type
+- `429` rate limit exceeded
+- `500` internal routing error
+- `502` upstream AI failure
 
-## Local Development
+Compatibility notes:
+- First request may omit `sessionId`; server generates one.
+- Follow-up requests should send returned `sessionId` to preserve context.
+- `textLogs` is optional for JSON mode.
+- Multipart uploads still require a non-empty `message` field.
+- Frontend defaults to same-origin `/chat` unless `VITE_API_BASE_URL` is set.
 
-Install dependencies:
+Minimal JSON example:
+
 ```bash
-npm install
-npm --prefix frontend install
+curl -X POST http://127.0.0.1:8787/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"timeouts in eu-west after deploy"}'
 ```
 
-Generate Worker env types:
+Expected result: JSON response with `sessionId` and non-empty `response`.
+Failure hint: if you get `415`, confirm `Content-Type: application/json` is set.
+
+Minimal multipart example:
+
 ```bash
-npm run cf-typegen
+curl -X POST http://127.0.0.1:8787/chat \
+  -F "message=Analyze these logs" \
+  -F "file=@sample-logs/incident-eu-west-checkout-timeout-retrystorm.log"
 ```
 
-Backend checks:
-```bash
-npm run typecheck
-npm test
-```
+Expected result: file is accepted and response contains investigation analysis text.
+Failure hint: if you get `400`, ensure `message` is included in multipart form.
 
-Run Worker API:
-```bash
-npm run dev
-```
+## 5-minute smoke test
 
-Run React UI in Vite (optional separate local frontend server):
-```bash
-npm run dev:frontend
-```
+1. Open the app URL and confirm the React page renders.
+2. Send a first message without `sessionId`.
+3. Send a follow-up in the same session and verify continuity.
+4. Upload `sample-logs/incident-eu-west-checkout-timeout-retrystorm.log`.
+5. Confirm response contains structured sections (pattern, hypotheses, next checks).
 
-If using Vite dev server, set:
-```bash
-VITE_API_BASE_URL=http://127.0.0.1:8787
-```
+Expected result: both message-only and file-upload flows return valid `sessionId` and `response`.
+Failure hint: if upload fails, verify multipart parser path and file size constraints.
 
-## Single-App Deploy (Worker + Static React Assets)
+Fast prompt pack for manual testing:
+- `sample-logs/incident-eu-west-test-prompts.md`
 
-Build React assets:
+Evaluator acceptance signals:
+- Response references evidence from uploaded logs.
+- Follow-up answer uses prior context in same session.
+- Output includes concrete next checks and mitigations.
+
+## Deploy command flow
+
+1. Build frontend assets.
+
 ```bash
 npm run build:frontend
 ```
 
-Deploy Worker (includes static assets from `frontend/dist`):
+Expected result: Vite builds assets into `frontend/dist`.
+Failure hint: if build fails, fix frontend TypeScript errors before deploy.
+
+2. Deploy Worker with static assets.
+
 ```bash
 npm run deploy
 ```
 
-`wrangler.jsonc` static assets config:
-- `assets.directory = ./frontend/dist`
-- `assets.not_found_handling = single-page-application`
-- `assets.run_worker_first = ["/chat", "/chat/*"]`
+Expected result: Wrangler uploads Worker + assets and prints a live URL.
+Failure hint: if deploy fails, verify Cloudflare auth, AI/DO bindings, and account permissions.
 
-## Smoke Test Checklist
+3. Verify production endpoint.
 
-1. Open deployed app URL and confirm React UI loads.
-2. Send first chat request without session ID.
-3. Confirm response includes generated `sessionId`.
-4. Send follow-up using same session and confirm continuity.
-5. Upload one log file and confirm successful analysis response.
+```bash
+curl -X POST https://<worker-name>.<account-subdomain>.workers.dev/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"production smoke test"}'
+```
+
+Expected result: `200` response with `sessionId` and `response`.
+Failure hint: if `404`, confirm Worker route and deployment target.
+
+Live URL format example:
+- `https://<worker-name>.<account-subdomain>.workers.dev`
+
+## Known limitations (MVP scope)
+- No D1/R2 billing or retention model in MVP.
+- No streaming token output; responses are returned as full text.
+- No Pages + Worker split topology in MVP.
+- No org-level authz/tenant controls in current submission scope.
+- No long-term file retention workflow in MVP.
+
+## Links to deep docs
+- Architecture: `docs/architecture.md`
+- Deployment: `docs/deployment.md`
+- Testing: `docs/testing.md`
+- Troubleshooting: `docs/troubleshooting.md`
+- Roadmap: `docs/roadmap.md`
+
+
+

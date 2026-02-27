@@ -24,7 +24,7 @@ This is a Cloudflare internship assignment. Every decision — architecture, nam
 | Language        | TypeScript                 |
 | State / Memory  | Cloudflare Durable Objects |
 | LLM             | Workers AI — Llama 3.3     |
-| Frontend        | Plain HTML + Vanilla JS    |
+| Frontend        | React + Vite + TypeScript  |
 | Config          | wrangler.jsonc             |
 | Package Manager | npm                        |
 
@@ -32,7 +32,7 @@ This is a Cloudflare internship assignment. Every decision — architecture, nam
 
 - No Node.js/Express backend
 - No external AI APIs (no OpenAI, no Anthropic)
-- No React, Vue, or frontend frameworks
+- React + Vite frontend is part of the current project baseline
 - No external databases (no Postgres, no MongoDB)
 - Everything runs on Cloudflare platform only
 
@@ -54,8 +54,9 @@ cf_ai_edge_incident_analyzer/
 │   ├── index.ts                 # Worker entry — request routing only
 │   └── types.ts                 # All shared TypeScript types live here only
 ├── frontend/
-│   ├── index.html               # Single-page chat UI
-│   └── main.js                  # Handles UI interactions and fetch calls
+│   ├── src/                     # React UI source (components, hooks, lib)
+│   ├── index.html               # Vite HTML entry
+│   └── package.json             # Frontend build scripts
 ├── .env                         # environment variables
 ├── CLAUDE.md                    # Onboarding doc for Claude Code agent
 ├── CODEX.md                     # This file
@@ -312,7 +313,7 @@ npx wrangler deploy
 - No streaming in MVP
 - No Vectorize in MVP
 - Single Worker, single endpoint
-- Frontend: plain HTML/JS, no framework
+- Frontend: React + Vite (TypeScript)
 
 ---
 
@@ -324,3 +325,4 @@ npx wrangler deploy
 4. Make the smallest change that completes the task.
 5. Do not refactor code outside the scope of your task.
 6. If the task changes the prompt, update `PROMPTS.md`.
+

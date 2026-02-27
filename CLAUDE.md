@@ -22,7 +22,7 @@ This is a Cloudflare internship submission. Code quality, architecture, and docu
 | Backend         | Cloudflare Workers (TypeScript)                                       |
 | Stateful Memory | Cloudflare Durable Objects                                            |
 | AI / LLM        | Workers AI — Llama 3.3 (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`)   |
-| Frontend        | Plain HTML + JS (served via Cloudflare Pages or Worker static assets) |
+| Frontend        | React + Vite + TypeScript (served via Worker static assets for MVP) |
 | Config          | `wrangler.jsonc`                                                      |
 | Language        | TypeScript throughout                                                 |
 
@@ -46,8 +46,9 @@ cf_ai_edge_incident_analyzer/
 │   ├── index.ts                 # Worker entry point — routes all requests
 │   └── types.ts                 # Shared TypeScript types
 ├── frontend/
-│   ├── index.html               # Chat UI (log paste + file upload)
-│   └── main.js                  # Frontend logic — API calls, DOM updates
+│   ├── src/                     # React UI source (components, hooks, lib)
+│   ├── index.html               # Vite HTML entry
+│   └── package.json             # Frontend scripts/build config
 ├── .env                         # environment variables
 ├── CLAUDE.md                    # This file
 ├── CODEX.md                     # Onboarding doc for Codex
@@ -239,7 +240,7 @@ interface Env {
 7. **The DO only stores and retrieves state** — no business logic inside `session.ts`.
 8. **PROMPTS.md must be updated** any time the prompt template in `prompt.ts` changes.
 9. **Do not install new npm packages** without confirming first — keep dependencies minimal.
-10. **Frontend is plain HTML/JS** — no React, no Vue, no bundler.
+10. **Frontend uses React + Vite** — keep API integration in `frontend/src/lib/api.ts` and avoid framework churn.
 
 ---
 
@@ -281,3 +282,4 @@ Local dev server runs at `http://localhost:8787`.
 4. Make the minimal change needed. Don't refactor unrelated code.
 5. If the task changes the prompt, update `PROMPTS.md`.
 6. If the task adds a new endpoint, register it in `index.ts`.
+

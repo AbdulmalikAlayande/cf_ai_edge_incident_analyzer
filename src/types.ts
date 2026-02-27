@@ -39,3 +39,5 @@ export type ErrorResponse = {
 export type ChatParseResult =
 	| { ok: true; value: ParsedChatRequest }
 	| { ok: false; response: Response };
+
+export type LogLevel = "info" | "warn" | "error";

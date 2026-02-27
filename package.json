@@ -3,12 +3,15 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"deploy": "wrangler deploy",
+		"deploy": "npm run build:frontend && wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"typecheck": "tsc --noEmit",
-		"test": "vitest run"
+		"test": "vitest run",
+		"build:frontend": "npm --prefix frontend run build",
+		"dev:frontend": "npm --prefix frontend run dev",
+		"build": "npm run build:frontend && npm run typecheck && npm test"
 	},
 	"dependencies": {
 		"chanfana": "^2.6.3",

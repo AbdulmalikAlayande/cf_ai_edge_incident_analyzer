@@ -1,23 +1,25 @@
 {
-  "name": "cloudflare-workers-openapi",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev",
-    "start": "wrangler dev",
-    "cf-typegen": "wrangler types",
-    "build:frontend": "node ./node_modules/esbuild/bin/esbuild frontend/scripts/main.ts --format=esm --target=es2022 --outfile=frontend/scripts/main.js",
-    "dev:frontend": "node ./node_modules/esbuild/bin/esbuild frontend/scripts/main.ts --format=esm --target=es2022 --outfile=frontend/scripts/main.js --watch"
-  },
-  "dependencies": {
-    "chanfana": "^2.6.3",
-    "hono": "^4.6.20",
-    "zod": "^3.24.1"
-  },
-  "devDependencies": {
-    "@types/node": "^22.13.0",
-    "@types/service-worker-mock": "^2.0.4",
-    "wrangler": "^4.67.0"
-  }
+	"name": "cloudflare-workers-openapi",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"cf-typegen": "wrangler types",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"chanfana": "^2.6.3",
+		"hono": "^4.6.20",
+		"zod": "^3.24.1"
+	},
+	"devDependencies": {
+		"@types/node": "^22.13.0",
+		"@types/service-worker-mock": "^2.0.4",
+		"typescript": "^5.9.2",
+		"vitest": "^3.2.4",
+		"wrangler": "^4.67.0"
+	}
 }

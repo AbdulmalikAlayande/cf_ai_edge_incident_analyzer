@@ -1,0 +1,55 @@
+2026-02-27T18:02:11.912Z [deploy-controller] INFO region=eu-west service=payments-api release=2026.02.27-rc4 event="rolling update started" replicas=12
+2026-02-27T18:02:20.103Z [kubelet] Warning pod=payments-api-7c86f7b4d8-lm2kg Readiness probe failed: HTTP probe failed with statuscode: 503
+2026-02-27T18:02:21.544Z [kubelet] Warning pod=payments-api-7c86f7b4d8-95mzj Liveness probe failed: HTTP probe failed with statuscode: 503
+2026-02-27T18:02:24.205Z [ingress-nginx] [error] req_id=6f8f17c4 upstream timed out (110: Operation timed out) while reading response header from upstream host=api.example.com path=/v1/checkout upstream=10.42.11.37:8080
+2026-02-27T18:02:24.282Z [ingress-nginx] [error] req_id=6f8f17c5 upstream timed out (110: Operation timed out) while reading response header from upstream host=api.example.com path=/v1/checkout upstream=10.42.11.41:8080
+2026-02-27T18:02:25.000Z [edge-gateway] WARN region=eu-west route=/v1/checkout status=504 latency_ms=60001 upstream=payments-api
+2026-02-27T18:02:25.333Z [payments-api] ERROR trace_id=tr-9a12d7f1 span=checkout.callInventory msg="dependency timeout" dependency=inventory-api region=eu-west timeout_ms=2000 elapsed_ms=2137
+2026-02-27T18:02:25.339Z [payments-api] WARN trace_id=tr-9a12d7f1 retry_policy=exp-backoff attempt=1 next_delay_ms=100 reason="inventory timeout"
+2026-02-27T18:02:25.445Z [payments-api] WARN trace_id=tr-9a12d7f1 retry_policy=exp-backoff attempt=2 next_delay_ms=200 reason="inventory timeout"
+2026-02-27T18:02:25.660Z [payments-api] WARN trace_id=tr-9a12d7f1 retry_policy=exp-backoff attempt=3 next_delay_ms=400 reason="inventory timeout"
+2026-02-27T18:02:26.094Z [payments-api] WARN trace_id=tr-9a12d7f1 retry_policy=exp-backoff attempt=4 next_delay_ms=800 reason="inventory timeout"
+2026-02-27T18:02:26.911Z [payments-api] WARN trace_id=tr-9a12d7f1 retry_policy=exp-backoff attempt=5 next_delay_ms=1600 reason="inventory timeout"
+2026-02-27T18:02:27.101Z [payments-api] ERROR trace_id=tr-9a12d7f1 circuit_breaker=inventory-api state=open open_for_ms=30000 reason="consecutive timeout threshold reached"
+2026-02-27T18:02:27.544Z [checkout-worker] WARN region=eu-west queue=checkout-events depth=14890 inflight=512 consumer_count=6 msg="queue backlog growing"
+2026-02-27T18:02:28.010Z [checkout-worker] WARN region=eu-west consumer_group=checkout-workers metric=consumer_lag value=18234 partition=11
+2026-02-27T18:02:28.102Z [checkout-worker] WARN region=eu-west consumer_group=checkout-workers metric=consumer_lag value=19402 partition=11
+2026-02-27T18:02:29.445Z [payments-api] ERROR trace_id=tr-cf227af2 msg="redis timeout awaiting response" command=GET key=session:usr_10012 timeout_ms=2000 elapsed_ms=9476 qs=152
+2026-02-27T18:02:29.752Z [payments-api] ERROR trace_id=tr-cf227af2 msg="cache fallback failed" reason="timeout" fallback=database
+2026-02-27T18:02:30.448Z [payments-api] ERROR trace_id=tr-b0a9d112 msg="database pool exhausted" db=orders max_pool=120 active=120 waiters=217
+2026-02-27T18:02:30.450Z [payments-api] WARN trace_id=tr-b0a9d112 msg="request queued waiting for db connection" wait_ms=1800
+2026-02-27T18:02:31.200Z [node-exporter] WARN node=euw-node-13 metric=cpu.utilization value=0.94
+2026-02-27T18:02:31.203Z [node-exporter] WARN node=euw-node-13 metric=memory.utilization value=0.91
+2026-02-27T18:02:31.920Z [kube-event] Warning pod=payments-api-7c86f7b4d8-lm2kg reason=BackOff msg="Back-off restarting failed container"
+2026-02-27T18:02:32.012Z [payments-api] INFO startup release=2026.02.27-rc4 commit=7fbb8d2 region=eu-west feature_flag=inventory_v2=true
+2026-02-27T18:02:32.799Z [payments-api] ERROR startup msg="inventory client initialization failed" reason="TLS handshake timeout" dependency=inventory-api
+2026-02-27T18:02:33.100Z [kubelet] Warning pod=payments-api-7c86f7b4d8-lm2kg Readiness probe failed: HTTP probe failed with statuscode: 503
+2026-02-27T18:02:35.110Z [ingress-nginx] [error] req_id=6f8f1888 upstream timed out (110: Operation timed out) while reading response header from upstream host=api.example.com path=/v1/checkout upstream=10.42.11.44:8080
+2026-02-27T18:02:37.180Z [edge-gateway] WARN region=eu-west route=/v1/checkout status=504 latency_ms=60000 upstream=payments-api
+2026-02-27T18:02:38.192Z [payments-api] ERROR trace_id=tr-9ff113ea msg="idempotency write failed" reason="redis timeout" command=SETEX timeout_ms=2000 elapsed_ms=10122
+2026-02-27T18:02:39.004Z [slo-monitor] ALERT service=payments-api region=eu-west metric=error_rate value=0.36 threshold=0.05 window=5m
+2026-02-27T18:02:39.008Z [slo-monitor] ALERT service=payments-api region=eu-west metric=p95_latency_ms value=58210 threshold=900
+2026-02-27T18:03:01.551Z [incident-bot] INFO severity=SEV-1 title="Checkout failures in eu-west after deploy"
+2026-02-27T18:03:11.220Z [oncall] INFO action="paused rollout" service=payments-api release=2026.02.27-rc4
+2026-02-27T18:03:22.880Z [oncall] INFO action="disabled feature flag" feature=inventory_v2 service=payments-api region=eu-west
+2026-02-27T18:03:25.790Z [payments-api] INFO config_reload feature_flag=inventory_v2=false
+2026-02-27T18:03:26.110Z [payments-api] WARN trace_id=tr-f102ea8d msg="inventory timeout" timeout_ms=2000 elapsed_ms=2055 attempt=1
+2026-02-27T18:03:26.419Z [payments-api] INFO trace_id=tr-f102ea8d msg="inventory response recovered" latency_ms=210 fallback=cache
+2026-02-27T18:03:27.500Z [checkout-worker] WARN region=eu-west queue=checkout-events depth=15210 inflight=530 consumer_count=6 msg="backlog still draining"
+2026-02-27T18:03:28.602Z [checkout-worker] INFO region=eu-west consumer_group=checkout-workers metric=consumer_lag value=12802 partition=11
+2026-02-27T18:03:31.009Z [payments-api] INFO trace_id=tr-d91fa200 msg="redis roundtrip normal" command=GET elapsed_ms=14
+2026-02-27T18:03:33.889Z [ingress-nginx] [warn] req_id=6f8f1992 upstream response is buffered to a temporary file while reading upstream
+2026-02-27T18:03:38.447Z [edge-gateway] INFO region=eu-west route=/v1/checkout status=200 latency_ms=322
+2026-02-27T18:04:02.110Z [slo-monitor] ALERT service=payments-api region=eu-west metric=error_rate value=0.12 threshold=0.05 window=5m
+2026-02-27T18:04:10.225Z [oncall] INFO action="rollback initiated" release_from=2026.02.27-rc4 release_to=2026.02.26-rc9 service=payments-api
+2026-02-27T18:04:32.882Z [deploy-controller] INFO service=payments-api release=2026.02.26-rc9 event="rollback completed" replicas=12
+2026-02-27T18:04:40.118Z [kubelet] Normal pod=payments-api-5f76cd6885-kk9xn Readiness probe succeeded
+2026-02-27T18:04:41.102Z [kubelet] Normal pod=payments-api-5f76cd6885-nwmt2 Readiness probe succeeded
+2026-02-27T18:04:45.608Z [edge-gateway] INFO region=eu-west route=/v1/checkout status=200 latency_ms=184
+2026-02-27T18:05:12.777Z [checkout-worker] INFO region=eu-west queue=checkout-events depth=6430 inflight=211 consumer_count=8 msg="backlog draining"
+2026-02-27T18:05:45.233Z [checkout-worker] INFO region=eu-west consumer_group=checkout-workers metric=consumer_lag value=1880 partition=11
+2026-02-27T18:06:02.091Z [slo-monitor] RESOLVED service=payments-api region=eu-west metric=error_rate value=0.018 threshold=0.05 window=5m
+2026-02-27T18:06:02.095Z [slo-monitor] RESOLVED service=payments-api region=eu-west metric=p95_latency_ms value=412 threshold=900
+2026-02-27T18:06:20.442Z [postmortem-bot] INFO preliminary_cause="new inventory client path increased dependency latency and triggered retry amplification"
+2026-02-27T18:06:20.447Z [postmortem-bot] INFO contributing_factor="timeouts + aggressive retries + db pool pressure + queue lag"
+2026-02-27T18:06:20.451Z [postmortem-bot] INFO mitigation="feature flag disable + rollback + backlog drain"

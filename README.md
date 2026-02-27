@@ -1,61 +1,71 @@
 # cf_ai_edge_incident_analyzer
 
-A stateful AI-powered investigation assistant that analyzes distributed system logs and incident descriptions, detects known failure patterns, and guides engineers through iterative root cause analysis using structured reasoning.
+Stateful Cloudflare Worker for distributed-systems incident investigation.
 
-## Example Usage
+## Server Architecture
 
-1. Step 1 – Initial Incident
+- `src/index.ts`: `/chat` HTTP entrypoint and Durable Object routing.
+- `src/endpoints/chat.ts`: payload parsing and normalization for JSON/multipart input.
+- `src/durable-objects/session.ts`: session lifecycle, history persistence, abuse guardrails, AI orchestration.
+- `src/lib/prompt.ts`: pure prompt builder from history + latest user input.
+- `src/lib/ai.ts`: Workers AI call with timeout/retry and explicit failure mapping.
+- `src/lib/utils.ts`: shared normalization helpers and structured logging utilities.
 
-   User pastes:
-   - Logs from multiple services
-   - Error traces
-   - Some metrics
-   - Description of what users are experiencing
+## API
 
-   System responds with:
-   - Detected failure pattern (e.g., cascading failure)
-   - Probable root cause hypothesis
-   - Impact explanation
-   - Suggested next checks
+`POST /chat`
 
-2. Step 2 – Follow-Up
+Accepts:
+- `application/json`: `{ "message": string, "sessionId"?: string, "textLogs"?: string }`
+- `multipart/form-data`: fields `message`, optional `sessionId`, optional `textLogs`, optional `file`
 
-   User says:
-   - “This only affects eu-west region.”
+Returns:
+```json
+{
+  "sessionId": "...",
+  "response": "..."
+}
+```
 
-   System:
-   - Updates hypothesis
-   - Reasons about regional failure
-   - Adjusts explanation
-
-3. Step 3 – Deeper Probing
-
-   User says:
-   - “Retries are set to 5 with exponential backoff.”
-
-   System:
-   - Recognizes retry storm risk
-   - Refines analysis
-   - Suggests circuit breaker misconfiguration possibility
-
-## Frontend TypeScript Workflow
-
-The frontend source file is `frontend/scripts/main.ts`.
-
-- Edit TypeScript: `frontend/scripts/main.ts`
-- Generated runtime file for browser: `frontend/scripts/main.js`
-
-Commands:
+## Local Commands
 
 ```bash
-npm run build:frontend
-npm run dev:frontend
+npm install
+npm run cf-typegen
+npm run typecheck
+npm test
 npm run dev
 ```
 
-Recommended local setup (2 terminals):
+## Verification (2026-02-27)
 
-1. `npm run dev:frontend` (keeps `main.js` in sync from TS)
-2. `npm run dev` (runs Wrangler worker)
+Automated checks run successfully:
 
-Frontend entry page: `frontend/views/index.html`
+```bash
+npm run typecheck
+# Result: pass
+
+npm test
+# Result: pass (4 files, 11 tests)
+```
+
+Test coverage includes:
+- request parser behavior (`tests/chat.test.ts`)
+- prompt composition (`tests/prompt.test.ts`)
+- session persistence/rate-limits/AI error mapping (`tests/session.test.ts`)
+- `/chat` route-to-DO forwarding behavior (`tests/index.integration.test.ts`)
+
+Manual runtime check (PowerShell):
+
+```powershell
+$first = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8787/chat" -ContentType "application/json" -Body (@{ message = "timeouts in eu-west after deploy" } | ConvertTo-Json)
+$second = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8787/chat" -ContentType "application/json" -Body (@{ sessionId = $first.sessionId; message = "retry count is 5 with exponential backoff" } | ConvertTo-Json)
+
+$first
+$second
+```
+
+Expected:
+- first response includes generated `sessionId`
+- second response keeps the same `sessionId`
+- both responses return structured assistant text in `response`

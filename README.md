@@ -1,71 +1,101 @@
 # cf_ai_edge_incident_analyzer
 
-Stateful Cloudflare Worker for distributed-systems incident investigation.
+Stateful Cloudflare incident investigation assistant.
 
-## Server Architecture
+## MVP Architecture (Internship)
 
-- `src/index.ts`: `/chat` HTTP entrypoint and Durable Object routing.
-- `src/endpoints/chat.ts`: payload parsing and normalization for JSON/multipart input.
-- `src/durable-objects/session.ts`: session lifecycle, history persistence, abuse guardrails, AI orchestration.
-- `src/lib/prompt.ts`: pure prompt builder from history + latest user input.
-- `src/lib/ai.ts`: Workers AI call with timeout/retry and explicit failure mapping.
-- `src/lib/utils.ts`: shared normalization helpers and structured logging utilities.
+Single deployed Cloudflare Worker app:
+- Serves React frontend static assets (`frontend/dist`)
+- Handles `POST /chat` API
+- Uses Durable Objects for session memory
+- Uses Workers AI for incident analysis
 
-## API
+MVP intentionally does not require Pages, D1, or R2.
 
-`POST /chat`
+## Backend Modules
 
-Accepts:
-- `application/json`: `{ "message": string, "sessionId"?: string, "textLogs"?: string }`
-- `multipart/form-data`: fields `message`, optional `sessionId`, optional `textLogs`, optional `file`
+- `src/index.ts`: routes `POST /chat` to Durable Objects
+- `src/endpoints/chat.ts`: JSON/multipart parsing + validation
+- `src/durable-objects/session.ts`: session lifecycle + rate/size guardrails
+- `src/lib/prompt.ts`: prompt construction
+- `src/lib/ai.ts`: Workers AI call with timeout/retry/failure mapping
+- `src/lib/utils.ts`: shared normalization/logging helpers
 
-Returns:
+## Frontend Integration Contract
+
+Endpoint: `POST /chat`
+
+Request:
+- `application/json`: `{ message, sessionId?, textLogs? }`
+- `multipart/form-data`: `message`, `sessionId?`, `textLogs?`, `file?`
+
+Response:
 ```json
 {
-  "sessionId": "...",
-  "response": "..."
+  "sessionId": "string",
+  "response": "string"
 }
 ```
 
-## Local Commands
+Frontend API behavior (`frontend/src/lib/api.ts`):
+- Defaults to same-origin `/chat`
+- Optional override via `VITE_API_BASE_URL` (or legacy `VITE_API_SERVER_URL`)
 
+## Local Development
+
+Install dependencies:
 ```bash
 npm install
+npm --prefix frontend install
+```
+
+Generate Worker env types:
+```bash
 npm run cf-typegen
+```
+
+Backend checks:
+```bash
 npm run typecheck
 npm test
+```
+
+Run Worker API:
+```bash
 npm run dev
 ```
 
-## Verification (2026-02-27)
-
-Automated checks run successfully:
-
+Run React UI in Vite (optional separate local frontend server):
 ```bash
-npm run typecheck
-# Result: pass
-
-npm test
-# Result: pass (4 files, 11 tests)
+npm run dev:frontend
 ```
 
-Test coverage includes:
-- request parser behavior (`tests/chat.test.ts`)
-- prompt composition (`tests/prompt.test.ts`)
-- session persistence/rate-limits/AI error mapping (`tests/session.test.ts`)
-- `/chat` route-to-DO forwarding behavior (`tests/index.integration.test.ts`)
-
-Manual runtime check (PowerShell):
-
-```powershell
-$first = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8787/chat" -ContentType "application/json" -Body (@{ message = "timeouts in eu-west after deploy" } | ConvertTo-Json)
-$second = Invoke-RestMethod -Method Post -Uri "http://127.0.0.1:8787/chat" -ContentType "application/json" -Body (@{ sessionId = $first.sessionId; message = "retry count is 5 with exponential backoff" } | ConvertTo-Json)
-
-$first
-$second
+If using Vite dev server, set:
+```bash
+VITE_API_BASE_URL=http://127.0.0.1:8787
 ```
 
-Expected:
-- first response includes generated `sessionId`
-- second response keeps the same `sessionId`
-- both responses return structured assistant text in `response`
+## Single-App Deploy (Worker + Static React Assets)
+
+Build React assets:
+```bash
+npm run build:frontend
+```
+
+Deploy Worker (includes static assets from `frontend/dist`):
+```bash
+npm run deploy
+```
+
+`wrangler.jsonc` static assets config:
+- `assets.directory = ./frontend/dist`
+- `assets.not_found_handling = single-page-application`
+- `assets.run_worker_first = ["/chat", "/chat/*"]`
+
+## Smoke Test Checklist
+
+1. Open deployed app URL and confirm React UI loads.
+2. Send first chat request without session ID.
+3. Confirm response includes generated `sessionId`.
+4. Send follow-up using same session and confirm continuity.
+5. Upload one log file and confirm successful analysis response.

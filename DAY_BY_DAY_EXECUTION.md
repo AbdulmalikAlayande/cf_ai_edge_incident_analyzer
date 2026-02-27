@@ -30,18 +30,18 @@ Exit criteria:
 
 ---
 
-**Day 3: Minimal Frontend + E2E**
+**Day 3: React Frontend + E2E**
 
-1. Build `frontend/index.html` (chat area, message input, optional file input, send button, session id display).
-2. Build `frontend/main.ts` (submit handler, JSON vs multipart payload, session reuse).
-3. Wire response rendering and error rendering.
+1. Build `frontend/src/components/chat/*` and `frontend/src/hooks/useChat.ts` for chat UX.
+2. Implement `frontend/src/lib/api.ts` (JSON + multipart payload handling, same-origin `/chat` default).
+3. Render response and error states in chat feed.
 4. Manually test first message + follow-up + file upload.
 
 Exit criteria:
 
 1. First send creates session, next sends reuse it.
 2. Responses and errors render clearly.
-3. Mobile/desktop basic usability is acceptable.
+3. Mobile/desktop usability is acceptable.
 
 ---
 
@@ -50,7 +50,7 @@ Exit criteria:
 1. Rotate leaked key and move secrets to Wrangler secret store.
 2. Re-check `PROMPTS.md` matches final `prompt.ts`.
 3. Validate all required behaviors with a fixed test checklist.
-4. Clean docs (`README.md` mismatch + merge artifact).
+4. Clean docs (`README.md` and onboarding docs) to match actual implementation.
 
 Exit criteria:
 
@@ -64,7 +64,7 @@ Exit criteria:
 
 1. Bug fixes from manual testing.
 2. Tighten edge-case handling (empty message, huge logs, invalid file).
-3. Final smoke test with `wrangler dev` and one deploy dry run flow (if needed).
+3. Final smoke test with `wrangler dev` and one deploy dry run flow.
 
 Exit criteria:
 

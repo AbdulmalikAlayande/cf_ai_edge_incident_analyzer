@@ -4,7 +4,7 @@ export interface SendChatPayload {
 	sessionId?: string;
 	message: string;
 	mode: ChatMode;
-	file?: File | null;
+	files?: File[];
 }
 
 export interface ChatApiResponse {
@@ -42,7 +42,7 @@ function normalizeMessage(payload: SendChatPayload): string {
 		return trimmed;
 	}
 
-	if (payload.file) {
+	if (payload.files && payload.files.length > 0) {
 		return DEFAULT_FILE_MESSAGE;
 	}
 

@@ -5,9 +5,9 @@ import AppPage from "@/app/page";
 import "@/index.css";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <AppLayout>
-      <AppPage />
-    </AppLayout>
-  </StrictMode>
+	<StrictMode>
+		<AppLayout>
+			<AppPage />
+		</AppLayout>
+	</StrictMode>,
 );

@@ -1,62 +1,54 @@
-import { useRef } from "react";
-import { Paperclip, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useRef, type ChangeEvent } from "react";
+import { Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 interface FileUploadProps {
-  file: File | null;
-  disabled?: boolean;
-  className?: string;
-  onFileChange: (file: File | null) => void;
+	disabled?: boolean;
+	onFilesChange: (files: File[]) => void;
 }
 
-function FileUpload({ file, disabled, className, onFileChange }: FileUploadProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+function FileUpload({ disabled, onFilesChange }: FileUploadProps) {
+	const inputRef = useRef<HTMLInputElement>(null);
 
-  const openFileDialog = () => {
-    inputRef.current?.click();
-  };
+	const openFileDialog = () => {
+		inputRef.current?.click();
+	};
 
-  const clearFile = () => {
-    onFileChange(null);
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
-  };
+	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const selectedFiles = Array.from(event.target.files ?? []);
+		if (selectedFiles.length === 0) {
+			return;
+		}
 
-  return (
-    <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      <input
-        ref={inputRef}
-        type="file"
-        className="hidden"
-        accept=".txt,.log,.json,text/plain,application/json"
-        disabled={disabled}
-        onChange={(event) => {
-          const nextFile = event.target.files?.[0] ?? null;
-          onFileChange(nextFile);
-        }}
-      />
+		onFilesChange(selectedFiles);
+		event.target.value = "";
+	};
 
-      <Button type="button" variant="secondary" size="sm" disabled={disabled} onClick={openFileDialog} className="bg-background/70">
-        <Paperclip className="size-4" />
-        Upload log file
-      </Button>
+	return (
+		<>
+			<input
+				ref={inputRef}
+				type="file"
+				className="hidden"
+				accept=".txt,.log,.json,text/plain,application/json"
+				multiple
+				disabled={disabled}
+				onChange={handleFileChange}
+			/>
 
-      {file ? (
-        <div className="flex items-center gap-2 rounded-md bg-background/65 px-2 py-1">
-          <Badge variant="secondary" className="max-w-56 truncate text-xs text-muted-foreground">
-            {file.name}
-          </Badge>
-          <Button type="button" variant="ghost" size="icon-xs" onClick={clearFile} disabled={disabled}>
-            <X className="size-3.5" />
-            <span className="sr-only">Remove file</span>
-          </Button>
-        </div>
-      ) : null}
-    </div>
-  );
+			<Button
+				type="button"
+				variant="ghost"
+				size="icon-sm"
+				disabled={disabled}
+				onClick={openFileDialog}
+				className="rounded-full border border-border/70 bg-white/80 text-slate-600 shadow-sm backdrop-blur-sm hover:bg-white dark:bg-white/5 dark:text-slate-200"
+			>
+				<Paperclip className="size-4" />
+				<span className="sr-only">Upload files</span>
+			</Button>
+		</>
+	);
 }
 
 export default FileUpload;

@@ -80,7 +80,7 @@ export async function sendChat(
 		method: "POST",
 	};
 
-	if (payload.file) {
+	if (payload.files && payload.files.length > 0) {
 		const formData = new FormData();
 		formData.set("message", normalizedMessage);
 
@@ -92,7 +92,9 @@ export async function sendChat(
 			formData.set("textLogs", payload.message.trim());
 		}
 
-		formData.set("file", payload.file);
+		for (const file of payload.files) {
+			formData.append("file", file);
+		}
 		requestInit.body = formData;
 	} else {
 		const body: JsonChatPayload = {

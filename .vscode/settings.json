@@ -1,5 +1,7 @@
 {
 	"files.associations": {
 		"wrangler.json": "jsonc"
-	}
+	},
+	"prettier.enable": true,
+	"editor.tabSize": 4
 }

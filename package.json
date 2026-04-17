@@ -4,8 +4,9 @@
 	"private": true,
 	"scripts": {
 		"deploy": "npm run build:frontend && wrangler deploy",
-		"dev": "wrangler dev",
-		"start": "wrangler dev",
+		"dev": "node scripts/dev.mjs",
+		"start": "node scripts/dev.mjs",
+		"dev:worker": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"typecheck": "tsc --noEmit",
 		"test": "vitest run",

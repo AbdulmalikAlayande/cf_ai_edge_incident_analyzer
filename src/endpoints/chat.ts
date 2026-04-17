@@ -63,13 +63,21 @@ async function parseMultipartBody(
 			? normalizeLineEndings(inlineLogsEntry)
 			: "";
 
-	const fileEntry = formData.get("file");
-	const fileLogs =
-		fileEntry && typeof fileEntry !== "string"
-			? normalizeLineEndings(await fileEntry.text())
-			: "";
+	const fileEntries = formData.getAll("file");
+	const fileLogParts: string[] = [];
 
-	const combinedLogs = [inlineLogs, fileLogs]
+	for (const entry of fileEntries) {
+		if (typeof entry === "string") {
+			continue;
+		}
+
+		const fileText = normalizeLineEndings(await entry.text());
+		if (fileText.trim().length > 0) {
+			fileLogParts.push(fileText);
+		}
+	}
+
+	const combinedLogs = [inlineLogs, ...fileLogParts]
 		.map((part) => part.trim())
 		.filter((part) => part.length > 0)
 		.join("\n\n");

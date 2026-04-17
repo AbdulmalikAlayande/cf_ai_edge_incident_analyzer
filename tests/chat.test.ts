@@ -24,11 +24,18 @@ describe("parseChatRequest", () => {
 		expect(result.value.userText).toBe("timeout in eu-west");
 	});
 
-	it("combines inline logs and file logs from multipart payload", async () => {
+	it("combines inline logs with all file logs from multipart payload", async () => {
 		const form = new FormData();
 		form.set("message", "incident summary");
 		form.set("textLogs", "line-a");
-		form.set("file", new File(["line-b"], "logs.txt", { type: "text/plain" }));
+		form.append(
+			"file",
+			new File(["line-b"], "logs-1.txt", { type: "text/plain" }),
+		);
+		form.append(
+			"file",
+			new File(["line-c"], "logs-2.txt", { type: "text/plain" }),
+		);
 
 		const request = new Request("https://example.com/chat", {
 			method: "POST",
@@ -40,7 +47,7 @@ describe("parseChatRequest", () => {
 		if (!result.ok) {
 			throw new Error("Expected multipart parse success");
 		}
-		expect(result.value.textLogs).toBe("line-a\n\nline-b");
+		expect(result.value.textLogs).toBe("line-a\n\nline-b\n\nline-c");
 		expect(result.value.userText).toContain("### Logs:");
 	});
 
@@ -57,7 +64,9 @@ describe("parseChatRequest", () => {
 			throw new Error("Expected parse failure");
 		}
 		expect(result.response.status).toBe(415);
-		expect(await readError(result.response)).toContain("Unsupported Content-Type");
+		expect(await readError(result.response)).toContain(
+			"Unsupported Content-Type",
+		);
 	});
 
 	it("rejects payloads over maximum size", async () => {

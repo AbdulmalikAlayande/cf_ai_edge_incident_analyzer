@@ -27,7 +27,7 @@ function ChatHeader({ sessionId, isSending, onResetSession }: ChatHeaderProps) {
 				<div className="max-w-3xl space-y-3">
 					<div className="inline-flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/[0.08] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700 shadow-sm shadow-sky-500/10 dark:text-sky-200">
 						<span className="size-1.5 rounded-full bg-sky-500 shadow-[0_0_0_4px_rgba(56,189,248,0.14)]" />
-						Investigation Workspace
+						Incident Lens workspace
 					</div>
 				</div>
 

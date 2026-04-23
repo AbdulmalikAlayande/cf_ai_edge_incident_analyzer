@@ -1,19 +1,23 @@
-# cf_ai_edge_incident_analyzer
+# Incident Lens
 
 Last verified: 2026-02-27
 
 ## Live URL
-- https://cf-ai-edge-incident-analyzer.alaabdulmalik03.workers.dev/
+
+- https://incidentlens.alaabdulmalik03.workers.dev
 
 ## Project in one sentence
-Cloudflare-native incident investigation assistant that analyzes logs with session-aware reasoning.
+
+Incident Lens is a Cloudflare-native incident response workspace that analyzes logs with session-aware reasoning and keeps every follow-up in context.
 
 ## What problem it solves
+
 - Engineers need faster incident triage during active outages.
 - Logs plus follow-up questions must remain in one session context.
 - AI output must be structured and immediately actionable for on-call teams.
 
 ## MVP architecture snapshot
+
 - Worker: serves React static assets and handles `POST /chat`.
 - Durable Objects: keeps per-session investigation history.
 - Workers AI: generates structured incident analysis.
@@ -81,6 +85,7 @@ Expected result: React UI loads and sends requests to local Worker.
 Failure hint: if requests fail, check browser network tab for incorrect host or CORS/preflight errors.
 
 Done when:
+
 - UI loads in browser.
 - First chat returns `sessionId`.
 - Follow-up chat reuses same `sessionId`.
@@ -88,6 +93,7 @@ Done when:
 ## API contract (`POST /chat`)
 
 Request formats:
+
 - JSON: `{ "message": string, "sessionId"?: string, "textLogs"?: string }`
 - Multipart: fields `message`, optional `sessionId`, optional `textLogs`, optional `file`
 
@@ -95,12 +101,13 @@ Response:
 
 ```json
 {
-  "sessionId": "string",
-  "response": "string"
+	"sessionId": "string",
+	"response": "string"
 }
 ```
 
 Error statuses currently used:
+
 - `400` invalid payload/body
 - `413` payload too large
 - `415` unsupported content type
@@ -109,6 +116,7 @@ Error statuses currently used:
 - `502` upstream AI failure
 
 Compatibility notes:
+
 - First request may omit `sessionId`; server generates one.
 - Follow-up requests should send returned `sessionId` to preserve context.
 - `textLogs` is optional for JSON mode.
@@ -149,9 +157,11 @@ Expected result: both message-only and file-upload flows return valid `sessionId
 Failure hint: if upload fails, verify multipart parser path and file size constraints.
 
 Fast prompt pack for manual testing:
+
 - `sample-logs/incident-eu-west-test-prompts.md`
 
 Evaluator acceptance signals:
+
 - Response references evidence from uploaded logs.
 - Follow-up answer uses prior context in same session.
 - Output includes concrete next checks and mitigations.
@@ -188,9 +198,11 @@ Expected result: `200` response with `sessionId` and `response`.
 Failure hint: if `404`, confirm Worker route and deployment target.
 
 Live URL:
+
 - `https://cf-ai-edge-incident-analyzer.alaabdulmalik03.workers.dev/`
 
 ## Known limitations (MVP scope)
+
 - No D1/R2 billing or retention model in MVP.
 - No streaming token output; responses are returned as full text.
 - No Pages + Worker split topology in MVP.
@@ -198,6 +210,7 @@ Live URL:
 - No long-term file retention workflow in MVP.
 
 ## Links to deep docs
+
 - Architecture: `docs/architecture.md`
 - Deployment: `docs/deployment.md`
 - Testing: `docs/testing.md`

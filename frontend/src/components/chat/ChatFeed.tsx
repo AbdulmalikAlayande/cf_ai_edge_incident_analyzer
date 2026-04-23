@@ -28,7 +28,7 @@ const QUICK_ACTIONS: Array<{
 	{
 		title: "Paste logs",
 		description:
-			"Drop in service and infrastructure logs for immediate pattern detection.",
+			"Paste service and infrastructure logs for fast pattern detection.",
 		icon: ClipboardPaste,
 		payload: {
 			mode: "logs",
@@ -38,21 +38,21 @@ const QUICK_ACTIONS: Array<{
 	{
 		title: "Describe incident",
 		description:
-			"Summarize user impact, affected region, and what changed before failure.",
+			"Summarize user impact, affected regions, and what changed before the failure.",
 		icon: FileChartColumnIncreasing,
 		payload: {
 			mode: "describe",
-			text: "Describe the incident timeline, impacted services, and what changed recently.",
+			text: "Describe the incident timeline, impacted services, and any recent changes.",
 		},
 	},
 	{
-		title: "Upload log file",
+		title: "Attach files",
 		description:
-			"Attach .txt, .log, or .json logs and investigate with session context.",
+			"Attach .txt, .log, or .json files and keep them with the session.",
 		icon: Upload,
 		payload: {
 			mode: "logs",
-			text: "I attached logs. Use them to identify probable causes and next checks.",
+			text: "I attached files. Use them to identify probable causes and next checks.",
 		},
 	},
 ];
@@ -79,11 +79,11 @@ function ChatFeed({ messages, onQuickAction }: ChatFeedProps) {
 					<div className="space-y-5 text-center xl:text-left">
 						<div className="space-y-3">
 							<h1 className="max-w-3xl text-balance text-2xl font-semibold tracking-[-0.04em] text-foreground sm:text-4xl lg:text-5xl">
-								Distributed Systems Incident Assistant
+								Incident Lens
 							</h1>
 							<p className="max-w-3xl text-pretty text-sm leading-6 text-muted-foreground sm:text-base">
-								Paste logs, describe impact, and keep iterating on the same
-								session until the failure pattern becomes clear.
+								Incident response workspace for logs, impact summaries, and
+								follow-up analysis in one session.
 							</p>
 						</div>
 

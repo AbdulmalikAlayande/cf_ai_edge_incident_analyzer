@@ -1,6 +1,6 @@
 # CLAUDE.md — Claude Code Onboarding Document
 
-# cf_ai_edge_incident_analyzer
+# Incident Lens
 
 > Read this file fully before writing, editing, or deleting any code.
 > You are a co-developer and systems engineer on this project. Act like one.
@@ -17,14 +17,14 @@ This is a Cloudflare internship submission. Code quality, architecture, and docu
 
 ## The Stack (Non-Negotiable)
 
-| Layer           | Technology                                                            |
-| --------------- | --------------------------------------------------------------------- |
-| Backend         | Cloudflare Workers (TypeScript)                                       |
-| Stateful Memory | Cloudflare Durable Objects                                            |
-| AI / LLM        | Workers AI — Llama 3.3 (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`)   |
+| Layer           | Technology                                                          |
+| --------------- | ------------------------------------------------------------------- |
+| Backend         | Cloudflare Workers (TypeScript)                                     |
+| Stateful Memory | Cloudflare Durable Objects                                          |
+| AI / LLM        | Workers AI — Llama 3.3 (`@cf/meta/llama-3.3-70b-instruct-fp8-fast`) |
 | Frontend        | React + Vite + TypeScript (served via Worker static assets for MVP) |
-| Config          | `wrangler.jsonc`                                                      |
-| Language        | TypeScript throughout                                                 |
+| Config          | `wrangler.jsonc`                                                    |
+| Language        | TypeScript throughout                                               |
 
 Do not introduce Node.js, Express, external databases, or third-party AI SDKs. Everything runs on Cloudflare.
 
@@ -246,7 +246,7 @@ interface Env {
 
 ## What Has Already Been Decided
 
-- Project: `cf_ai_edge_incident_analyzer`
+- Project: `Incident Lens`
 - Target use case: distributed systems failure analysis
 - Log input: any format (plain text, JSON, file upload)
 - LLM: Llama 3.3 via Workers AI
@@ -282,4 +282,3 @@ Local dev server runs at `http://localhost:8787`.
 4. Make the minimal change needed. Don't refactor unrelated code.
 5. If the task changes the prompt, update `PROMPTS.md`.
 6. If the task adds a new endpoint, register it in `index.ts`.
-

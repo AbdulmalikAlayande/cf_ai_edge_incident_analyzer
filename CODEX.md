@@ -1,6 +1,6 @@
 # CODEX.md — Codex Onboarding Document
 
-# cf_ai_edge_incident_analyzer
+# Incident Lens
 
 > Read this entire file before touching any code.
 > You are operating as a co-developer on a Cloudflare-native TypeScript project.
@@ -10,7 +10,7 @@
 
 ## Project Summary
 
-**cf_ai_edge_incident_analyzer** is a stateful AI debugging assistant that runs at Cloudflare's edge. Engineers submit distributed system logs (any format — plain text, JSON, or uploaded files) and receive structured incident analysis powered by an LLM. The system remembers the conversation session so follow-up questions stay in context.
+**Incident Lens** is a stateful AI debugging assistant that runs at Cloudflare's edge. Engineers submit distributed system logs (any format — plain text, JSON, or uploaded files) and receive structured incident analysis powered by an LLM. The system remembers the conversation session so follow-up questions stay in context.
 
 This is a Cloudflare internship assignment. Every decision — architecture, naming, code style — must be intentional and clean.
 
@@ -305,7 +305,7 @@ npx wrangler deploy
 
 ## What Is Already Decided (Do Not Revisit)
 
-- Repo name: `cf_ai_edge_incident_analyzer`
+- Repo name: `Incident Lens`
 - Use case: distributed systems incident analysis
 - Log formats supported: plain text, JSON, file upload
 - LLM: Llama 3.3 via Workers AI only
@@ -325,4 +325,3 @@ npx wrangler deploy
 4. Make the smallest change that completes the task.
 5. Do not refactor code outside the scope of your task.
 6. If the task changes the prompt, update `PROMPTS.md`.
-

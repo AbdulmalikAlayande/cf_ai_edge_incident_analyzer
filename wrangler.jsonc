@@ -4,7 +4,7 @@
  */
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "cf-ai-edge-incident-analyzer",
+	"name": "incident-lens",
 	"main": "src/index.ts",
 	"compatibility_date": "2026-02-19",
 	"observability": {
